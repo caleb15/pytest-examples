@@ -11,7 +11,9 @@ from unittest import mock
 from fah import do_stuff
 def test():
     with mock.patch('fah.foo'):
-        do_stuff()
+        do_stuff() # foo is safely mocked in do_stuff
+    do_stuff() # <- 'foo' would not get mocked in this call'!
+    # only calls in the with block get mocked
 
 # or:
 @mock.patch('fah.foo')
@@ -22,7 +24,7 @@ def test(mocker):
 # patch path examples
 
 
-def test_patch_library_function(mocker):
+def test_patch_standard_library_function(mocker):
     # the import: from random import randint
     # because import is in foo we need to reference it with foo
     mocker.patch("foo.randint", return_value=0)
@@ -46,7 +48,7 @@ def test_patch_json_dumps_bad(mocker):
         m = mocker.patch("foo.dumps")
 
 
-def test_patch_json_dumps_stdlib(mocker):
+def test_patch_json_dumps_bad_2(mocker):
     # This technically works
     # but it also mocks stdlib functions in this file!
     m = mocker.patch("json.dumps")
@@ -58,6 +60,16 @@ def test_patch_json_dumps_stdlib(mocker):
 def test_patch_json_dumps(mocker):
     m = mocker.patch("foo.json.dumps")
     foo.call_json_dumps() == m
+
+
+def test_patch_urllib(mocker):
+    m = mocker.patch("foo.urllib.request")
+    foo.call_urllib() == m
+
+
+def test_patch_urllib_open(mocker):
+    m = mocker.patch("foo.urllib.request.urlopen")
+    foo.call_urllib() == m
 
 
 def test_patch_object(mocker):
